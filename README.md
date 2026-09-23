@@ -1,6 +1,8 @@
 # Openself
 
-个人学习笔记和项目介绍。静态页面，用浏览器打开 `index.html` 即可，不需要构建。
+个人学习笔记和项目介绍。静态页面，用浏览器打开 `index.html` 即可，GitHub Pages 直接发布仓库根目录，不需要构建服务器。
+
+首页的 `openself` 使用 React Bits 的 ParticleText（JavaScript + CSS）。已构建文件是 `js/openself-particle.js`。源组件在 `components/ParticleText.jsx`，安装命令是 `npx shadcn@latest add @react-bits/ParticleText-JS-CSS`。改完标题挂载后运行 `npm run build:title`，把生成的脚本一并提交。
 
 - `index.html` 首页
 - `notes.html` 笔记页

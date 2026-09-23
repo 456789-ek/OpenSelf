@@ -1,0 +1,15 @@
+{
+  "name": "openself",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:title": "esbuild src/mount-openself.jsx --bundle --format=iife --outfile=js/openself-particle.js --minify --jsx=automatic --define:process.env.NODE_ENV=\\\"production\\\""
+  },
+  "dependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.9"
+  }
+}
