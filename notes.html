@@ -7,8 +7,9 @@
   <meta name="theme-color" content="#161310" />
   <title>笔记 · Openself</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="css/system.css" />
-  <link rel="stylesheet" href="css/home.css" />
+  <link rel="stylesheet" href="css/system.css?v=galaxy" />
+  <link rel="stylesheet" href="css/home.css?v=galaxy" />
+  <link rel="prefetch" href="index.html" />
   <script>
     (function () {
       var root = document.documentElement;
@@ -18,11 +19,28 @@
         root.classList.add("vt-arrive");
         root.classList.remove("is-arriving");
       });
+      var reduce = false;
       try {
+        reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      } catch (err) {}
+      try {
+        var cameraRaw = sessionStorage.getItem("openself-camera");
+        if (cameraRaw) {
+          sessionStorage.removeItem("openself-camera");
+          if (!reduce) {
+            var camera = JSON.parse(cameraRaw);
+            if (camera && camera.mode === "return") {
+              root.classList.add("camera-return");
+              root.setAttribute("data-camera-target", camera.target || "");
+            } else if (camera && camera.mode === "arrive") {
+              root.classList.add("is-camera-arrive");
+            }
+          }
+        }
         var turn = sessionStorage.getItem("openself-turn");
         if (!turn) return;
         sessionStorage.removeItem("openself-turn");
-        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        if (reduce || root.classList.contains("is-camera-arrive") || root.classList.contains("camera-return")) return;
         root.classList.add("is-arriving");
       } catch (err) {}
     })();
@@ -40,6 +58,7 @@
     <nav class="site-nav" aria-label="页内">
       <a href="notes.html" aria-current="page">笔记</a>
       <a href="projects.html">项目</a>
+      <a href="awards.html">奖项</a>
     </nav>
   </header>
 
@@ -161,6 +180,6 @@
     </div>
   </dialog>
 
-  <script src="js/home.js"></script>
+  <script src="js/home.js?v=galaxy"></script>
 </body>
 </html>

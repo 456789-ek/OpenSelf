@@ -21,12 +21,30 @@
 }
 
 @font-face {
+  font-family: "Openself Serif";
+  src: url("../fonts/noto-serif-sc-700-award.woff") format("woff");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+5956;
+}
+
+@font-face {
   font-family: "Openself Sans";
   src: url("../fonts/noto-sans-sc-500.woff2") format("woff2");
   font-weight: 500;
   font-style: normal;
   font-display: swap;
   unicode-range: U+20, U+2b, U+30-39, U+b7, U+2014, U+2026, U+2192, U+3001-3002, U+300c-300d, U+4e00, U+4e0a-4e0b, U+4e0d-4e0e, U+4e2a, U+4e3b, U+4e60, U+4e92, U+4ea4, U+4eba, U+4ecb, U+4ee5, U+4f1a, U+4f4d, U+505a, U+5148, U+5165, U+5171, U+5173, U+5185, U+518d, U+5199, U+5206, U+5217, U+5230, U+52a0, U+5373, U+53ca, U+53e3, U+53ef, U+5404, U+540e, U+548c, U+54c1, U+5668, U+5728, U+597d, U+5b66, U+5b8c, U+5bb9, U+5c06, U+5efa, U+5f00, U+5f0f, U+5f85, U+6001, U+6210, U+6253, U+6309, U+653e, U+6587, U+65f6, U+662f, U+6682, U+6709, U+6765, U+6784, U+67e5, U+6b63, U+6ca1, U+6d4f, U+70b9, U+7248, U+73b0, U+7528, U+7559, U+7684, U+76ee, U+770b, U+7740, U+7a7a, U+7ad9, U+7ae0, U+7b14, U+7b49, U+7bc7, U+7cfb, U+7ecd, U+7edf, U+7ee7, U+7eed, U+7ffb, U+884c, U+8865, U+8981, U+89c6, U+89c8-89c9, U+8a00, U+8bb0, U+8bed, U+8df3, U+8fc7, U+8fd8-8fd9, U+8fdb, U+91cc, U+94fa, U+95e8, U+95ed, U+968f, U+9700, U+9759, U+9762, U+9875, U+9879, U+9996, U+ff08-ff09, U+ff0b-ff0c, U+ff1a-ff1b;
+}
+
+@font-face {
+  font-family: "Openself Sans";
+  src: url("../fonts/noto-sans-sc-500-award.woff") format("woff");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+5956;
 }
 
 @font-face {

@@ -3,13 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Openself：个人学习笔记与项目介绍。" />
+  <meta name="description" content="Openself：个人学习笔记、项目与奖项。" />
   <meta name="theme-color" content="#07091a" />
   <title>Openself</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="css/system.css" />
-  <link rel="stylesheet" href="css/home.css?v=night" />
+  <link rel="stylesheet" href="css/system.css?v=galaxy" />
+  <link rel="stylesheet" href="css/home.css?v=galaxy" />
   <link rel="stylesheet" href="js/openself-particle.css?v=night" />
+  <link rel="prefetch" href="notes.html" />
+  <link rel="prefetch" href="projects.html" />
+  <link rel="prefetch" href="awards.html" />
   <style>
     .page-home {
       background: #07091a;
@@ -27,9 +30,12 @@
       position: relative;
       z-index: 1;
     }
+    .page-home .choices {
+      z-index: 2;
+    }
     .page-home .word {
       width: 100%;
-      height: clamp(400px, 62vh, 680px);
+      height: clamp(210px, 36vh, 420px);
     }
     .page-home .word-particles {
       position: absolute;
@@ -53,11 +59,28 @@
         root.classList.add("vt-arrive");
         root.classList.remove("is-arriving");
       });
+      var reduce = false;
       try {
+        reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      } catch (err) {}
+      try {
+        var cameraRaw = sessionStorage.getItem("openself-camera");
+        if (cameraRaw) {
+          sessionStorage.removeItem("openself-camera");
+          if (!reduce) {
+            var camera = JSON.parse(cameraRaw);
+            if (camera && camera.mode === "return") {
+              root.classList.add("camera-return");
+              root.setAttribute("data-camera-target", camera.target || "");
+            } else if (camera && camera.mode === "arrive") {
+              root.classList.add("is-camera-arrive");
+            }
+          }
+        }
         var turn = sessionStorage.getItem("openself-turn");
         if (!turn) return;
         sessionStorage.removeItem("openself-turn");
-        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        if (reduce || root.classList.contains("is-camera-arrive") || root.classList.contains("camera-return")) return;
         root.classList.add("is-arriving");
       } catch (err) {}
     })();
@@ -72,14 +95,23 @@
       <span class="word-fallback">openself</span>
       <div id="openself-title" class="word-particles"></div>
     </h1>
-    <nav class="choices" aria-label="进入">
-      <a href="notes.html">笔记</a>
-      <a href="projects.html">项目</a>
+    <nav class="choices bento-section" aria-label="进入">
+      <a class="magic-bento-card magic-bento-card--text-autohide magic-bento-card--border-glow" href="notes.html" data-section="notes">
+        <span class="magic-bento-card__title">笔记</span>
+      </a>
+      <a class="magic-bento-card magic-bento-card--text-autohide magic-bento-card--border-glow" href="projects.html" data-section="projects">
+        <span class="magic-bento-card__title">项目</span>
+      </a>
+      <a class="magic-bento-card magic-bento-card--text-autohide magic-bento-card--border-glow" href="awards.html" data-section="awards">
+        <span class="magic-bento-card__title">奖项</span>
+      </a>
     </nav>
+    <div class="zoom-veil" aria-hidden="true"></div>
   </main>
 
-  <script src="js/sky.js?v=night"></script>
+  <script src="js/sky.js?v=galaxy"></script>
   <script src="js/openself-particle.js?v=night"></script>
-  <script src="js/home.js"></script>
+  <script src="js/bento.js?v=galaxy"></script>
+  <script src="js/home.js?v=galaxy"></script>
 </body>
 </html>
