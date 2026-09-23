@@ -8,8 +8,27 @@
   <title>Openself</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="css/system.css" />
-  <link rel="stylesheet" href="css/home.css" />
-  <link rel="stylesheet" href="js/openself-particle.css" />
+  <link rel="stylesheet" href="css/home.css?v=particle" />
+  <link rel="stylesheet" href="js/openself-particle.css?v=particle" />
+  <style>
+    .page-home .word {
+      position: relative;
+      width: 100%;
+      height: 360px;
+    }
+    .page-home .word-particles {
+      position: absolute;
+      inset: 0;
+    }
+    .word.is-ready .word-fallback {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+    }
+  </style>
   <script>
     (function () {
       var root = document.documentElement;
@@ -44,7 +63,7 @@
     </nav>
   </main>
 
-  <script src="js/openself-particle.js"></script>
+  <script src="js/openself-particle.js?v=particle"></script>
   <script src="js/home.js"></script>
 </body>
 </html>
