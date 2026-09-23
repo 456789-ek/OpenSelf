@@ -75,7 +75,9 @@
       if (section.offsetTop <= marker) current = section.id;
     });
     navLinks.forEach(function (link) {
-      if (link.getAttribute("href") === "#" + current) {
+      var href = link.getAttribute("href") || "";
+      if (href.charAt(0) !== "#") return;
+      if (href === "#" + current) {
         link.setAttribute("aria-current", "true");
       } else {
         link.removeAttribute("aria-current");
