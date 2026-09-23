@@ -20,7 +20,6 @@ const mixRgb = (from, to, amount) => ({
 const rgbToCss = rgb => `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
-const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
 
 const resolveFontSize = (value, container, fontWeight, fontFamily) => {
   if (typeof value === 'number') return value;
@@ -61,6 +60,7 @@ const ParticleText = ({
   pointerRepel = 40,
   repelRadius = 120,
   idleDrift = 0.7,
+  settle = 0.04,
   trigger = 'mount',
   fontSize = 'clamp(3rem, 12vw, 8rem)',
   fontWeight = 800,
@@ -125,16 +125,9 @@ const ParticleText = ({
     };
 
     const drawParticle = particle => {
-      const size = particle.size;
       ctx.fillStyle = particle.color;
-
-      if (size <= 2.1) {
-        ctx.fillRect(particle.x - size / 2, particle.y - size / 2, size, size);
-        return;
-      }
-
       ctx.beginPath();
-      ctx.arc(particle.x, particle.y, size / 2, 0, Math.PI * 2);
+      ctx.arc(particle.x, particle.y, Math.max(0.35, particle.size / 2), 0, Math.PI * 2);
       ctx.fill();
     };
 
@@ -148,8 +141,9 @@ const ParticleText = ({
         ctx.shadowBlur = 0;
       }
 
-      pointer.smoothX += (pointer.x - pointer.smoothX) * 0.18;
-      pointer.smoothY += (pointer.y - pointer.smoothY) * 0.18;
+      const pointerEase = reducedMotion ? 1 : 0.06;
+      pointer.smoothX += (pointer.x - pointer.smoothX) * pointerEase;
+      pointer.smoothY += (pointer.y - pointer.smoothY) * pointerEase;
 
       let complete = true;
 
@@ -161,7 +155,7 @@ const ParticleText = ({
         if (gathering) {
           const local = (now - gatherStart - particle.delay) / Math.max(1, reducedMotion ? 1 : gatherDuration);
           progress = clamp(local, 0, 1);
-          const eased = easeOutCubic(progress);
+          const eased = progress;
           baseX = particle.startX + (particle.targetX - particle.startX) * eased;
           baseY = particle.startY + (particle.targetY - particle.startY) * eased;
           if (progress < 1) complete = false;
@@ -182,11 +176,12 @@ const ParticleText = ({
           }
         }
 
-        const follow = reducedMotion ? 1 : 0.22;
+        const follow = reducedMotion ? 1 : gathering ? 0.16 : settle;
         particle.x += (baseX - particle.x) * follow;
         particle.y += (baseY - particle.y) * follow;
 
-        ctx.globalAlpha = clamp(0.35 + progress * 0.65, 0, 1);
+        const star = 0.72 + particle.seed * 0.28;
+        ctx.globalAlpha = clamp(star * (0.86 + progress * 0.14), 0, 1);
         drawParticle(particle);
       });
 
@@ -281,7 +276,7 @@ const ParticleText = ({
         }
       }
 
-      const maxParticles = Math.max(900, Math.min(5200, Math.floor((width * height) / 90)));
+      const maxParticles = Math.max(1400, Math.min(16000, Math.floor((width * height) / 28)));
       const stride = Math.max(1, Math.ceil(targets.length / maxParticles));
       const baseRgb = hexToRgb(color);
       const highlightRgb = hexToRgb(highlightColor);
@@ -290,7 +285,8 @@ const ParticleText = ({
       particles = selected.map((target, index) => {
         const seed = ((index * 9301 + 49297) % 233280) / 233280;
         const depth = 0.45 + (((index * 233 + 97) % 1000) / 1000) * 0.9;
-        const blend = baseRgb && highlightRgb ? clamp(target.x / Math.max(1, width) + (seed - 0.5) * 0.35, 0, 1) : 0;
+        const along = target.x / Math.max(1, width);
+        const blend = baseRgb && highlightRgb ? clamp((seed - 0.62) * 0.9 + along * 0.08, 0, 0.58) : 0;
         const particleColor = baseRgb && highlightRgb ? rgbToCss(mixRgb(baseRgb, highlightRgb, blend)) : color;
         const angle = seed * Math.PI * 2;
         const distance = (reducedMotion ? 0 : scatter) * (0.35 + depth * 0.75);
@@ -398,6 +394,7 @@ const ParticleText = ({
     pointerRepel,
     repelRadius,
     idleDrift,
+    settle,
     trigger,
     fontSize,
     fontWeight,

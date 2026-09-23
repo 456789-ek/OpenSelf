@@ -9,21 +9,22 @@ if (mount) {
   createRoot(mount).render(
     <ParticleText
       text="openself"
-      particleSize={2.2}
-      density={4}
-      color="#f8fafc"
-      highlightColor="#8b5cf6"
-      scatter={190}
-      gatherDuration={1600}
-      stagger={420}
-      pointerRepel={42}
-      repelRadius={120}
-      idleDrift={0.8}
+      particleSize={1.15}
+      density={2}
+      color="#f7f9ff"
+      highlightColor="#9ec9ff"
+      scatter={150}
+      gatherDuration={3000}
+      stagger={360}
+      pointerRepel={72}
+      repelRadius={160}
+      idleDrift={0.35}
+      settle={0.04}
       trigger="mount"
-      fontSize="clamp(3.5rem, 13vw, 9rem)"
-      fontWeight={800}
-      fontFamily="inherit"
-      glow
+      fontSize="clamp(3.4rem, 12vw, 8.4rem)"
+      fontWeight={700}
+      fontFamily='"Openself Display", Syne, sans-serif'
+      glow={false}
     />
   );
 

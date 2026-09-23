@@ -1,6 +1,14 @@
+html:has(body.page-home) {
+  background: #07091a;
+}
+
 .page-home {
-  background: var(--cover);
-  color: var(--cream);
+  background: #07091a;
+  color: #f4f7ff;
+}
+
+.page-home::before {
+  display: none;
 }
 
 .hero {
@@ -14,21 +22,21 @@
   padding: 2.5rem 1.25rem 3rem;
   overflow: hidden;
   text-align: center;
-  color: var(--cream);
+  color: #f4f7ff;
   background:
-    radial-gradient(760px 440px at 50% 44%, rgba(232, 176, 106, 0.18), transparent 64%),
-    linear-gradient(165deg, var(--cover-2), var(--cover) 62%);
+    radial-gradient(120% 42% at 48% 44%, rgba(214, 226, 255, 0.14), transparent 58%),
+    radial-gradient(70% 28% at 66% 60%, rgba(150, 182, 230, 0.08), transparent 72%),
+    linear-gradient(180deg, #07091a 0%, #0c1428 46%, #161e36 100%);
 }
 
-.hero-glow {
+.night-sky {
   position: absolute;
   inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
-  background: radial-gradient(
-    440px circle at var(--gx, 50%) var(--gy, 42%),
-    rgba(236, 186, 120, 0.28),
-    transparent 62%
-  );
+  display: block;
 }
 
 .word,
@@ -39,7 +47,7 @@
 
 .word {
   width: 100%;
-  height: 360px;
+  height: clamp(400px, 62vh, 680px);
   margin: 0;
   font-family: var(--display);
   font-weight: 700;
@@ -93,7 +101,7 @@
   text-decoration: none;
   font-size: 1.15rem;
   letter-spacing: 0.08em;
-  color: rgba(247, 241, 230, 0.78);
+  color: rgba(232, 238, 255, 0.8);
 }
 
 .choices a::after {
@@ -111,7 +119,7 @@
 
 .choices a:hover,
 .choices a:focus-visible {
-  color: var(--cream);
+  color: #f7f9ff;
 }
 
 .choices a:hover::after,
