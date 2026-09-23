@@ -228,7 +228,8 @@
   background: var(--paper);
 }
 
-.page-notes .notes {
+.page-notes .notes,
+.page-projects .projects {
   padding-top: calc(var(--header) + 2.4rem);
 }
 
@@ -481,6 +482,21 @@
   opacity: 1;
   transform: none;
   transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+}
+
+html.is-arriving .hero-title .line,
+html.vt-arrive .hero-title .line,
+html:active-view-transition .hero-title .line {
+  animation: none;
+  opacity: 1;
+  transform: none;
+}
+
+html.is-arriving .reveal,
+html.vt-arrive .reveal,
+html:active-view-transition .reveal {
+  opacity: 1;
+  transform: none;
 }
 
 @keyframes line-in {

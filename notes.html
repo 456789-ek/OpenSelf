@@ -9,7 +9,24 @@
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="css/system.css" />
   <link rel="stylesheet" href="css/home.css" />
-  <script>document.documentElement.classList.add("js");</script>
+  <script>
+    (function () {
+      var root = document.documentElement;
+      root.classList.add("js");
+      window.addEventListener("pagereveal", function (event) {
+        if (!event.viewTransition) return;
+        root.classList.add("vt-arrive");
+        root.classList.remove("is-arriving");
+      });
+      try {
+        var turn = sessionStorage.getItem("openself-turn");
+        if (!turn) return;
+        sessionStorage.removeItem("openself-turn");
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        root.classList.add("is-arriving");
+      } catch (err) {}
+    })();
+  </script>
 </head>
 <body class="page-notes">
   <a class="skip" href="#main">跳到主要内容</a>
@@ -22,7 +39,7 @@
     </a>
     <nav class="site-nav" aria-label="页内">
       <a href="notes.html" aria-current="page">笔记</a>
-      <a href="index.html#projects">项目</a>
+      <a href="projects.html">项目</a>
     </nav>
   </header>
 

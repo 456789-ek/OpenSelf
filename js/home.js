@@ -207,5 +207,95 @@
 
   window.addEventListener("hashchange", syncFromHash);
   window.addEventListener("popstate", syncFromHash);
-  syncFromHash();
+
+  var crossDocTurn = typeof CSSViewTransitionRule !== "undefined" &&
+    typeof PageSwapEvent !== "undefined" &&
+    "viewTransition" in PageSwapEvent.prototype;
+  var turnPages = {
+    "index.html": true,
+    "notes.html": true,
+    "projects.html": true
+  };
+
+  function pageFile(pathname) {
+    var parts = (pathname || "").split("/");
+    var last = parts[parts.length - 1];
+    return last || "index.html";
+  }
+
+  function crossPageLink(link) {
+    if (!link || link.tagName !== "A") return false;
+    if (link.target && link.target !== "_self") return false;
+    if (link.hasAttribute("download")) return false;
+    var raw = link.getAttribute("href");
+    if (!raw || raw.charAt(0) === "#") return false;
+    var url;
+    try {
+      url = new URL(link.href, location.href);
+    } catch (err) {
+      return false;
+    }
+    if (url.origin !== location.origin) return false;
+    var dest = pageFile(url.pathname);
+    if (!turnPages[dest]) return false;
+    return dest !== pageFile(location.pathname);
+  }
+
+  function whenArrived(done) {
+    if (!root.classList.contains("is-arriving")) {
+      done();
+      return;
+    }
+    var finished = false;
+    function finish() {
+      if (finished) return;
+      finished = true;
+      done();
+    }
+    document.body.addEventListener("animationend", function (event) {
+      if (event.target !== document.body || event.animationName !== "turn-in") return;
+      finish();
+    });
+    window.setTimeout(finish, 900);
+  }
+
+  whenArrived(syncFromHash);
+
+  window.addEventListener("pageshow", function (event) {
+    if (!event.persisted) return;
+    if (reduced() || crossDocTurn) {
+      root.classList.remove("is-leaving");
+      return;
+    }
+    root.classList.remove("is-arriving");
+    void root.offsetWidth;
+    root.classList.add("is-arriving");
+    root.classList.remove("is-leaving");
+  });
+
+  document.addEventListener("click", function (event) {
+    if (event.defaultPrevented || event.button !== 0) return;
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    if (reduced() || crossDocTurn) return;
+    var link = event.target;
+    while (link && link !== document && link.tagName !== "A") link = link.parentNode;
+    if (!crossPageLink(link)) return;
+    event.preventDefault();
+    var href = link.href;
+    var gone = false;
+    function go() {
+      if (gone) return;
+      gone = true;
+      try {
+        sessionStorage.setItem("openself-turn", "1");
+      } catch (err) {}
+      window.location.href = href;
+    }
+    root.classList.add("is-leaving");
+    document.body.addEventListener("animationend", function (event) {
+      if (event.target !== document.body || event.animationName !== "turn-out") return;
+      go();
+    });
+    window.setTimeout(go, 700);
+  });
 })();
