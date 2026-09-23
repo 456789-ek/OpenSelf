@@ -9,7 +9,24 @@
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="css/system.css" />
   <link rel="stylesheet" href="css/home.css" />
-  <script>document.documentElement.classList.add("js");</script>
+  <script>
+    (function () {
+      var root = document.documentElement;
+      root.classList.add("js");
+      window.addEventListener("pagereveal", function (event) {
+        if (!event.viewTransition) return;
+        root.classList.add("vt-arrive");
+        root.classList.remove("is-arriving");
+      });
+      try {
+        var turn = sessionStorage.getItem("openself-turn");
+        if (!turn) return;
+        sessionStorage.removeItem("openself-turn");
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        root.classList.add("is-arriving");
+      } catch (err) {}
+    })();
+  </script>
 </head>
 <body>
   <a class="skip" href="#main">跳到主要内容</a>
@@ -22,7 +39,7 @@
     </a>
     <nav class="site-nav" aria-label="页内">
       <a href="notes.html">笔记</a>
-      <a href="#projects">项目</a>
+      <a href="projects.html">项目</a>
     </nav>
   </header>
 
@@ -44,7 +61,7 @@
           </p>
           <div class="hero-actions">
             <a class="btn btn-solid" href="notes.html">进入笔记</a>
-            <a class="btn btn-ghost" href="#projects">看项目</a>
+            <a class="btn btn-ghost" href="projects.html">看项目</a>
           </div>
         </div>
 
@@ -80,52 +97,12 @@
       </div>
     </section>
 
-    <section class="band projects" id="projects" aria-labelledby="projects-title">
-      <div class="wrap reveal">
-        <div class="section-head">
-          <p class="index-no">01</p>
-          <div>
-            <h2 id="projects-title">项目</h2>
-            <p>做完的项目，各写一篇介绍。现在没有可以打开的成品。</p>
-          </div>
-        </div>
-
-        <div class="frames">
-          <button class="frame" type="button" data-open="project" data-tilt>
-            <span class="frame-kicker">空位 01</span>
-            <span class="frame-title">项目即将加入</span>
-            <span class="frame-go">打开</span>
-          </button>
-          <button class="frame" type="button" data-open="project" data-tilt>
-            <span class="frame-kicker">空位 02</span>
-            <span class="frame-title">项目即将加入</span>
-            <span class="frame-go">打开</span>
-          </button>
-        </div>
-      </div>
-    </section>
   </main>
 
   <footer class="site-footer">
     <span class="seal" aria-hidden="true">开</span>
     <p>Openself · 学习笔记与项目介绍</p>
   </footer>
-
-  <dialog class="entry" id="entry">
-    <div class="entry-shell">
-      <button class="icon-btn" type="button" data-close>关闭</button>
-
-      <article class="entry-panel" data-panel="project" hidden>
-        <p class="kicker">项目</p>
-        <h2 id="entry-projects-title">项目即将加入</h2>
-        <p>做过的项目会各写一篇介绍。这里还是空的，没有可以打开的成品。</p>
-        <div class="slots" role="list">
-          <div class="slot" role="listitem">空位 01</div>
-          <div class="slot" role="listitem">空位 02</div>
-        </div>
-      </article>
-    </div>
-  </dialog>
 
   <script src="js/home.js"></script>
 </body>

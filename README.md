@@ -4,6 +4,7 @@
 
 - `index.html` 首页
 - `notes.html` 笔记页
+- `projects.html` 项目页
 - `css/system.css` 笔记页可以共用的视觉系统
 - `css/home.css` 首页版式
 - `js/home.js` 页面交互

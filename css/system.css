@@ -72,6 +72,7 @@
 html {
   scroll-behavior: smooth;
   scroll-padding-top: calc(var(--header) + 0.5rem);
+  background: var(--paper);
 }
 
 body {
@@ -443,6 +444,52 @@ h3 {
   }
 }
 
+@keyframes turn-out {
+  to {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes turn-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+
+html.is-leaving body {
+  animation: turn-out 0.5s var(--ease) both;
+  pointer-events: none;
+}
+
+html.is-arriving body {
+  animation: turn-in 0.68s var(--ease) both;
+}
+
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-group(root) {
+  animation-duration: 0.64s;
+  overflow: hidden;
+}
+
+::view-transition-image-pair(root) {
+  isolation: isolate;
+}
+
+::view-transition-old(root) {
+  animation: none;
+  opacity: 1;
+}
+
+::view-transition-new(root) {
+  mix-blend-mode: normal;
+  animation: turn-in 0.64s var(--ease) both;
+}
+
 @media (max-width: 720px) {
   .wrap {
     width: min(var(--wrap), calc(100% - 1.6rem));
@@ -481,5 +528,22 @@ h3 {
   .js .reveal {
     opacity: 1;
     transform: none;
+  }
+
+  html.is-arriving body,
+  html.is-leaving body {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  @view-transition {
+    navigation: none;
+  }
+
+  ::view-transition-old(root),
+  ::view-transition-new(root),
+  ::view-transition-group(root) {
+    animation: none !important;
   }
 }
