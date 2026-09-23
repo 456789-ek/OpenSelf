@@ -99,19 +99,16 @@
 
 .fan {
   position: relative;
-  height: 440px;
+  height: 420px;
   perspective: 1100px;
   transform-style: preserve-3d;
 }
 
 .card {
-  position: absolute;
-  left: 50%;
-  top: 48%;
-  width: 198px;
-  height: 272px;
-  margin-left: -99px;
-  margin-top: -146px;
+  position: relative;
+  width: 176px;
+  height: 244px;
+  flex: none;
   display: flex;
   flex-direction: column;
   padding: 1rem 1rem 1.05rem 1.55rem;
@@ -127,7 +124,7 @@
   );
   background-position: 0 3.1rem;
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.24);
-  transform: rotate(var(--rot)) translateY(calc(var(--i, 0) * -4px));
+  transform: rotate(var(--rot));
   transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
 }
 
@@ -173,15 +170,15 @@
 
 .card:hover,
 .card:focus-visible {
-  z-index: 3;
-  transform: rotate(var(--rot)) translateY(-18px) scale(1.04);
+  z-index: 6;
+  transform: rotate(var(--rot)) translateY(-16px) scale(1.03);
   box-shadow: 0 28px 50px rgba(0, 0, 0, 0.32);
 }
 
 .card-ghost {
   color: var(--cream);
-  background: transparent;
-  border: 1px dashed rgba(247, 241, 230, 0.42);
+  background: rgba(247, 241, 230, 0.05);
+  border: 1.5px dashed rgba(247, 241, 230, 0.72);
   box-shadow: none;
 }
 
@@ -500,8 +497,19 @@
 
 @media (min-width: 861px) {
   .fan {
-    transform: rotateX(var(--rx, 6deg)) rotateY(var(--ry, -10deg));
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    transform: rotateX(var(--rx, 4deg)) rotateY(var(--ry, -6deg));
     transition: transform 0.18s linear;
+  }
+
+  .card {
+    margin-left: -58px;
+  }
+
+  .card:first-child {
+    margin-left: 0;
   }
 }
 

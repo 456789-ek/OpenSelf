@@ -104,8 +104,8 @@
       var rect = fan.getBoundingClientRect();
       var x = (event.clientX - rect.left) / rect.width - 0.5;
       var y = (event.clientY - rect.top) / rect.height - 0.5;
-      fan.style.setProperty("--ry", (x * 18).toFixed(2) + "deg");
-      fan.style.setProperty("--rx", (-y * 12).toFixed(2) + "deg");
+      fan.style.setProperty("--ry", (x * 10).toFixed(2) + "deg");
+      fan.style.setProperty("--rx", (-y * 8).toFixed(2) + "deg");
     });
     fan.addEventListener("pointerleave", function () {
       fan.style.removeProperty("--ry");
@@ -195,6 +195,10 @@
   function syncFromHash() {
     if (hashLock || !dialog) return;
     var id = location.hash.replace(/^#/, "");
+    if (id === "notes" || id === "projects" || id === "top" || id === "") {
+      if (dialog.open) dialog.close();
+      return;
+    }
     if (panelById(id)) openEntry(id, false);
     else if (dialog.open) dialog.close();
   }
