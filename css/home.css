@@ -114,6 +114,7 @@
   padding: 1rem 1rem 1.05rem 1.55rem;
   border-radius: 5px;
   text-align: left;
+  text-decoration: none;
   color: var(--ink);
   background-color: var(--shade, var(--cream));
   background-image: repeating-linear-gradient(
@@ -225,6 +226,10 @@
 
 .notes {
   background: var(--paper);
+}
+
+.page-notes .notes {
+  padding-top: calc(var(--header) + 2.4rem);
 }
 
 .projects {

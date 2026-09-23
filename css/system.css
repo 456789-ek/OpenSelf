@@ -260,11 +260,13 @@ h3 {
 }
 
 .site-nav a:hover::after,
-.site-nav a[aria-current="true"]::after {
+.site-nav a[aria-current="true"]::after,
+.site-nav a[aria-current="page"]::after {
   transform: scaleX(1);
 }
 
-.site-nav a[aria-current="true"] {
+.site-nav a[aria-current="true"],
+.site-nav a[aria-current="page"] {
   color: var(--stamp);
 }
 
