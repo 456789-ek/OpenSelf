@@ -3,22 +3,235 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Openself：个人学习笔记与项目介绍。按语言进入 C、C++、Python，项目介绍随后补上。" />
+  <meta name="theme-color" content="#161310" />
   <title>Openself</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="css/system.css" />
+  <link rel="stylesheet" href="css/home.css" />
+  <script>document.documentElement.classList.add("js");</script>
 </head>
 <body>
-  <h1>Openself</h1>
-  <p>这里放我的学习笔记，以及做过的项目介绍。</p>
+  <a class="skip" href="#main">跳到主要内容</a>
+  <div class="progress" data-progress aria-hidden="true"></div>
 
-  <h2>笔记</h2>
-  <ul>
-    <li>第一篇笔记标题（先占位）</li>
-    <li>第二篇笔记标题（先占位）</li>
-  </ul>
+  <header class="site-header" data-header>
+    <a class="brand" href="#top">
+      <span class="seal" aria-hidden="true">开</span>
+      <span class="brand-name">Openself</span>
+    </a>
+    <nav class="site-nav" aria-label="页内">
+      <a href="#notes">笔记</a>
+      <a href="#projects">项目</a>
+    </nav>
+  </header>
 
-  <h2>项目</h2>
-  <ul>
-    <li>项目一：一句话说明它是做什么的</li>
-    <li>项目二：一句话说明它是做什么的</li>
-  </ul>
+  <main id="main">
+    <section class="hero" id="top" aria-labelledby="hero-title">
+      <div class="hero-glow" aria-hidden="true"></div>
+      <p class="spine" aria-hidden="true">笔记 / 项目</p>
+      <p class="hero-bg" aria-hidden="true">Openself</p>
+
+      <div class="hero-inner wrap">
+        <div class="hero-copy">
+          <p class="kicker">个人站点</p>
+          <h1 id="hero-title" class="hero-title">
+            <span class="line">学过的，</span>
+            <span class="line">放在这里。</span>
+          </h1>
+          <p class="lede">
+            C、C++、Python 的学习笔记，以及做过的项目介绍。文章还没写进来，入口先铺好。
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-solid" href="#notes">进入笔记</a>
+            <a class="btn btn-ghost" href="#projects">看项目</a>
+          </div>
+        </div>
+
+        <div class="fan" data-fan>
+          <button class="card" type="button" data-open="c" style="--rot: -13deg; --x: -64px; --shade: #f6f0e4" aria-label="C，笔记即将加入">
+            <span class="card-top"><span>01</span><span>笔记</span></span>
+            <span class="card-lang">C</span>
+            <span class="card-state">笔记即将加入</span>
+          </button>
+          <button class="card" type="button" data-open="cpp" style="--rot: -3deg; --x: -8px; --shade: #f3ead9" aria-label="C++，笔记即将加入">
+            <span class="card-top"><span>02</span><span>笔记</span></span>
+            <span class="card-lang">C++</span>
+            <span class="card-state">笔记即将加入</span>
+          </button>
+          <button class="card" type="button" data-open="python" style="--rot: 8deg; --x: 46px; --shade: #efe3d2" aria-label="Python，笔记即将加入">
+            <span class="card-top"><span>03</span><span>笔记</span></span>
+            <span class="card-lang">Py</span>
+            <span class="card-state">笔记即将加入</span>
+          </button>
+          <button class="card card-ghost" type="button" data-open="more" style="--rot: 16deg; --x: 96px" aria-label="下一门语言，以后再加">
+            <span class="card-top"><span>04</span><span>以后</span></span>
+            <span class="card-lang">+</span>
+            <span class="card-state">语言以后再加</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="marquee" aria-hidden="true">
+        <div class="marquee-track">
+          <p>C · C++ · Python · 笔记即将加入 · 项目即将加入 · 下一门语言 ·&nbsp;</p>
+          <p>C · C++ · Python · 笔记即将加入 · 项目即将加入 · 下一门语言 ·&nbsp;</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="band notes" id="notes" aria-labelledby="notes-title">
+      <div class="wrap reveal">
+        <div class="section-head">
+          <p class="index-no">01</p>
+          <div>
+            <h2 id="notes-title">笔记</h2>
+            <p>按语言分开。点一行翻开，里面暂时还是空位。</p>
+          </div>
+        </div>
+
+        <p class="watermark" data-mark aria-hidden="true">C</p>
+
+        <div class="toc">
+          <button class="toc-row" type="button" data-open="c" data-mark-source="C">
+            <span class="toc-no">01</span>
+            <span class="toc-name">C</span>
+            <span class="toc-note">笔记即将加入</span>
+            <span class="toc-count">0 篇</span>
+            <span class="toc-go">翻开</span>
+            <span class="toc-slots">
+              <span class="chip">空位</span>
+              <span class="chip">空位</span>
+              <span class="chip">空位</span>
+            </span>
+          </button>
+          <button class="toc-row" type="button" data-open="cpp" data-mark-source="C++">
+            <span class="toc-no">02</span>
+            <span class="toc-name">C++</span>
+            <span class="toc-note">笔记即将加入</span>
+            <span class="toc-count">0 篇</span>
+            <span class="toc-go">翻开</span>
+            <span class="toc-slots">
+              <span class="chip">空位</span>
+              <span class="chip">空位</span>
+              <span class="chip">空位</span>
+            </span>
+          </button>
+          <button class="toc-row" type="button" data-open="python" data-mark-source="Py">
+            <span class="toc-no">03</span>
+            <span class="toc-name">Python</span>
+            <span class="toc-note">笔记即将加入</span>
+            <span class="toc-count">0 篇</span>
+            <span class="toc-go">翻开</span>
+            <span class="toc-slots">
+              <span class="chip">空位</span>
+              <span class="chip">空位</span>
+              <span class="chip">空位</span>
+            </span>
+          </button>
+          <button class="toc-row is-reserved" type="button" data-open="more" data-mark-source="+">
+            <span class="toc-no">04</span>
+            <span class="toc-name">下一门</span>
+            <span class="toc-note">语言以后再加</span>
+            <span class="toc-count">待加</span>
+            <span class="toc-go">查看</span>
+            <span class="toc-slots">
+              <span class="chip">空位</span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="band projects" id="projects" aria-labelledby="projects-title">
+      <div class="wrap reveal">
+        <div class="section-head">
+          <p class="index-no">02</p>
+          <div>
+            <h2 id="projects-title">项目</h2>
+            <p>做完的项目，各写一篇介绍。现在没有可以打开的成品。</p>
+          </div>
+        </div>
+
+        <div class="frames">
+          <button class="frame" type="button" data-open="project" data-tilt>
+            <span class="frame-kicker">空位 01</span>
+            <span class="frame-title">项目即将加入</span>
+            <span class="frame-go">打开</span>
+          </button>
+          <button class="frame" type="button" data-open="project" data-tilt>
+            <span class="frame-kicker">空位 02</span>
+            <span class="frame-title">项目即将加入</span>
+            <span class="frame-go">打开</span>
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <span class="seal" aria-hidden="true">开</span>
+    <p>Openself · 学习笔记与项目介绍</p>
+  </footer>
+
+  <dialog class="entry" id="entry">
+    <div class="entry-shell">
+      <button class="icon-btn" type="button" data-close>关闭</button>
+
+      <article class="entry-panel" data-panel="c" hidden>
+        <p class="kicker">笔记</p>
+        <h2 id="entry-c-title">C</h2>
+        <p>笔记即将加入。这一门还没有文章，写好以后会列在下面。</p>
+        <div class="slots" role="list">
+          <div class="slot" role="listitem">空位 01</div>
+          <div class="slot" role="listitem">空位 02</div>
+          <div class="slot" role="listitem">空位 03</div>
+        </div>
+      </article>
+
+      <article class="entry-panel" data-panel="cpp" hidden>
+        <p class="kicker">笔记</p>
+        <h2 id="entry-cpp-title">C++</h2>
+        <p>笔记即将加入。这一门还没有文章，写好以后会列在下面。</p>
+        <div class="slots" role="list">
+          <div class="slot" role="listitem">空位 01</div>
+          <div class="slot" role="listitem">空位 02</div>
+          <div class="slot" role="listitem">空位 03</div>
+        </div>
+      </article>
+
+      <article class="entry-panel" data-panel="python" hidden>
+        <p class="kicker">笔记</p>
+        <h2 id="entry-python-title">Python</h2>
+        <p>笔记即将加入。这一门还没有文章，写好以后会列在下面。</p>
+        <div class="slots" role="list">
+          <div class="slot" role="listitem">空位 01</div>
+          <div class="slot" role="listitem">空位 02</div>
+          <div class="slot" role="listitem">空位 03</div>
+        </div>
+      </article>
+
+      <article class="entry-panel" data-panel="more" hidden>
+        <p class="kicker">笔记</p>
+        <h2 id="entry-more-title">下一门语言</h2>
+        <p>语言入口会继续加。现在先留着 C、C++ 和 Python。</p>
+        <div class="slots" role="list">
+          <div class="slot" role="listitem">空位</div>
+        </div>
+      </article>
+
+      <article class="entry-panel" data-panel="project" hidden>
+        <p class="kicker">项目</p>
+        <h2 id="entry-projects-title">项目即将加入</h2>
+        <p>做过的项目会各写一篇介绍。这里还是空的，没有可以打开的成品。</p>
+        <div class="slots" role="list">
+          <div class="slot" role="listitem">空位 01</div>
+          <div class="slot" role="listitem">空位 02</div>
+        </div>
+      </article>
+    </div>
+  </dialog>
+
+  <script src="js/home.js"></script>
 </body>
 </html>
