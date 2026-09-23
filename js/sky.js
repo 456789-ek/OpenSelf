@@ -11,7 +11,12 @@
   var stars = [];
   var width = 0;
   var height = 0;
+  var span = 1;
   var frame = 0;
+  var running = false;
+  var angle = -0.46;
+  var cosA = Math.cos(angle);
+  var sinA = Math.sin(angle);
 
   function mulberry32(seed) {
     var value = seed >>> 0;
@@ -24,6 +29,17 @@
     };
   }
 
+  function gaussian(rng) {
+    var u = Math.max(1e-7, rng());
+    var v = rng();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(Math.PI * 2 * v);
+  }
+
+  function wrap(pos, size) {
+    var next = pos % size;
+    return next < 0 ? next + size : next;
+  }
+
   function build() {
     var rect = canvas.parentElement.getBoundingClientRect();
     width = Math.max(1, Math.floor(rect.width));
@@ -33,119 +49,195 @@
     canvas.height = Math.max(1, Math.floor(height * dpr));
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    var rng = mulberry32(0x0e11a5);
-    var count = Math.max(900, Math.min(4200, Math.round((width * height) / 300)));
-    var brightCount = Math.max(12, Math.min(22, Math.round(width / 88)));
+    span = Math.hypot(width, height) * 1.85;
+    var rng = mulberry32(0x6a1a77);
+    var area = width * height;
+    var bandCount = Math.max(1400, Math.min(3400, Math.round(area / 380)));
+    var fieldCount = Math.max(320, Math.min(980, Math.round(area / 1500)));
+    var sigma = Math.max(54, height * 0.125);
     stars = [];
 
-    for (var i = 0; i < count; i += 1) {
-      var bright = i < brightCount;
-      var medium = !bright && rng() < 0.07;
+    var i;
+    for (i = 0; i < bandCount; i += 1) {
+      var across = gaussian(rng) * sigma;
+      var core = Math.exp(-(across * across) / (2 * sigma * sigma * 0.62));
+      var bright = rng() < 0.03 + core * 0.04;
       stars.push({
-        x: rng() * width,
-        y: rng() * height,
-        r: bright ? 1.25 + rng() * 0.55 : medium ? 0.85 + rng() * 0.35 : 0.4 + rng() * 0.45,
-        a: bright ? 0.62 + rng() * 0.28 : medium ? 0.28 + rng() * 0.16 : 0.1 + rng() * 0.2,
-        cool: rng() > 0.78,
+        along: rng() * span,
+        across: across,
+        layer: rng() < 0.22 ? 2 : 1,
+        r: bright ? 1.2 + rng() * 0.75 : 0.32 + rng() * (0.55 + core * 0.7),
+        a: Math.min(1, (bright ? 0.72 + rng() * 0.28 : 0.16 + rng() * 0.5) * (0.28 + core)),
+        warm: rng() < 0.42 + core * 0.45,
         twinkle: bright,
+        spike: bright && rng() < 0.65,
         phase: rng() * Math.PI * 2,
-        period: 4800 + rng() * 3600
+        period: 3400 + rng() * 4600
+      });
+    }
+
+    for (i = 0; i < fieldCount; i += 1) {
+      var brightField = i < Math.max(14, Math.round(width / 110));
+      stars.push({
+        along: rng() * span,
+        across: (rng() - 0.5) * height * 1.55,
+        layer: 0,
+        r: brightField ? 1.05 + rng() * 0.5 : 0.28 + rng() * 0.5,
+        a: brightField ? 0.5 + rng() * 0.4 : 0.08 + rng() * 0.22,
+        warm: rng() > 0.8,
+        twinkle: brightField,
+        spike: brightField,
+        phase: rng() * Math.PI * 2,
+        period: 4200 + rng() * 5200
       });
     }
   }
 
-  function wrap(pos, span) {
-    var next = pos % span;
-    return next < 0 ? next + span : next;
+  function project(along, across, drift) {
+    var a = wrap(along + drift, span) - span * 0.5;
+    return {
+      x: width * 0.5 + a * cosA - across * sinA,
+      y: height * 0.47 + a * sinA + across * cosA
+    };
   }
 
-  function wash(driftX, driftY) {
-    ctx.save();
-    ctx.translate(width * 0.47 + driftX, height * 0.42 + driftY);
-    ctx.rotate(-0.38);
-    ctx.scale(1.15, 0.26);
-    var band = ctx.createRadialGradient(0, 0, 0, 0, 0, Math.max(width, height) * 0.62);
-    band.addColorStop(0, "rgba(232, 238, 255, 0.16)");
-    band.addColorStop(0.42, "rgba(168, 196, 238, 0.07)");
-    band.addColorStop(1, "rgba(168, 196, 238, 0)");
-    ctx.fillStyle = band;
-    ctx.beginPath();
-    ctx.arc(0, 0, Math.max(width, height) * 0.62, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-
-    ctx.save();
-    ctx.translate(width * 0.66 + driftX * 0.7, height * 0.6 + driftY * 0.5);
-    ctx.rotate(-0.58);
-    ctx.scale(1.05, 0.16);
-    var wisp = ctx.createRadialGradient(0, 0, 0, 0, 0, width * 0.38);
-    wisp.addColorStop(0, "rgba(176, 206, 255, 0.07)");
-    wisp.addColorStop(1, "rgba(176, 206, 255, 0)");
-    ctx.fillStyle = wisp;
-    ctx.beginPath();
-    ctx.arc(0, 0, width * 0.38, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
+  function onScreen(x, y, pad) {
+    return x >= -pad && y >= -pad && x <= width + pad && y <= height + pad;
   }
 
-  function draw(now) {
-    var reduced = reduceQuery.matches;
-    var time = reduced ? 0 : now || 0;
-    var driftX = reduced ? 0 : Math.sin(time * 0.00008) * 10;
-    var driftY = reduced ? 0 : Math.cos(time * 0.00005) * 4;
-
-    var sky = ctx.createLinearGradient(0, 0, width * 0.2, height);
+  function paintSky() {
+    var sky = ctx.createLinearGradient(0, 0, width * 0.15, height);
     sky.addColorStop(0, "#07091a");
-    sky.addColorStop(0.42, "#0c1428");
-    sky.addColorStop(1, "#161e36");
+    sky.addColorStop(0.48, "#0b1224");
+    sky.addColorStop(1, "#141c33");
     ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = "source-over";
     ctx.fillStyle = sky;
     ctx.fillRect(0, 0, width, height);
+  }
 
-    var depth = ctx.createRadialGradient(
-      width * 0.5,
-      height * 0.42,
-      height * 0.12,
-      width * 0.5,
-      height * 0.55,
-      height * 0.9
-    );
-    depth.addColorStop(0, "rgba(58, 86, 148, 0.16)");
-    depth.addColorStop(1, "rgba(2, 4, 12, 0.34)");
-    ctx.fillStyle = depth;
-    ctx.fillRect(0, 0, width, height);
+  function paintBlob(x, y, radius, flatten, inner, mid) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+    ctx.scale(1, flatten);
+    var glow = ctx.createRadialGradient(0, 0, 0, 0, 0, radius);
+    glow.addColorStop(0, inner);
+    glow.addColorStop(0.42, mid);
+    glow.addColorStop(1, "rgba(140, 160, 200, 0)");
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(0, 0, radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
 
-    wash(driftX, driftY);
+  function paintBand(drift) {
+    var step = Math.max(150, width * 0.16);
+    var count = Math.ceil(span / step) + 1;
+    var i;
+    var reach = Math.max(width, height) * 0.42;
+    for (i = 0; i < count; i += 1) {
+      var point = project(i * step, 0, drift);
+      if (!onScreen(point.x, point.y, reach)) continue;
+      paintBlob(
+        point.x,
+        point.y,
+        reach,
+        0.3,
+        "rgba(255, 246, 220, 0.42)",
+        "rgba(176, 198, 236, 0.16)"
+      );
+    }
+
+    var riftStep = Math.max(220, width * 0.28);
+    var riftCount = Math.ceil(span / riftStep) + 1;
+    for (i = 0; i < riftCount; i += 1) {
+      var rift = project(i * riftStep + span * 0.08, height * 0.012, drift);
+      if (!onScreen(rift.x, rift.y, width * 0.5)) continue;
+      paintBlob(
+        rift.x,
+        rift.y,
+        width * 0.42,
+        0.055,
+        "rgba(5, 7, 16, 0.48)",
+        "rgba(5, 7, 16, 0.16)"
+      );
+    }
+  }
+
+  function paintStar(star, x, y, alpha) {
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = star.warm ? "#fff3d8" : "#e4edff";
+    ctx.beginPath();
+    ctx.arc(x, y, star.r, 0, Math.PI * 2);
+    ctx.fill();
+    if (!star.spike) return;
+    ctx.globalAlpha = alpha * 0.55;
+    ctx.strokeStyle = ctx.fillStyle;
+    ctx.lineWidth = 0.7;
+    ctx.beginPath();
+    ctx.moveTo(x - star.r * 3.4, y);
+    ctx.lineTo(x + star.r * 3.4, y);
+    ctx.moveTo(x, y - star.r * 3.4);
+    ctx.lineTo(x, y + star.r * 3.4);
+    ctx.stroke();
+  }
+
+  function paint(now) {
+    var reduced = reduceQuery.matches;
+    var time = reduced ? 0 : now || 0;
+    var drift = reduced ? 0 : time * 0.034;
+    var sway = reduced ? 0 : Math.sin(time * 0.00012) * 16;
+
+    paintSky();
+    paintBand(drift);
 
     var i;
     for (i = 0; i < stars.length; i += 1) {
       var star = stars[i];
+      var speed = star.layer === 0 ? 0.26 : star.layer === 2 ? 1.18 : 1;
+      var point = project(star.along, star.across + sway * (star.layer === 0 ? 0.25 : 1), drift * speed);
+      if (!onScreen(point.x, point.y, 12)) continue;
       var alpha = star.a;
       if (star.twinkle && !reduced) {
         var wave = 0.5 + 0.5 * Math.sin((time / star.period) * Math.PI * 2 + star.phase);
-        alpha = star.a * (0.42 + 0.58 * wave);
+        alpha *= 0.42 + 0.58 * wave;
       }
-      var parallax = star.twinkle ? 1 : 0.35 + (i % 7) * 0.08;
-      ctx.globalAlpha = alpha;
-      ctx.fillStyle = star.cool ? "#c5d9ff" : "#f5f8ff";
-      ctx.beginPath();
-      ctx.arc(wrap(star.x + driftX * parallax, width), wrap(star.y + driftY * parallax, height), star.r, 0, Math.PI * 2);
-      ctx.fill();
+      paintStar(star, point.x, point.y, alpha);
     }
-
     ctx.globalAlpha = 1;
-    if (!reduced) frame = window.requestAnimationFrame(draw);
+  }
+
+  function draw(now) {
+    if (!running) return;
+    paint(now);
+    if (!reduceQuery.matches) frame = window.requestAnimationFrame(draw);
+  }
+
+  function halt() {
+    running = false;
+    if (frame) window.cancelAnimationFrame(frame);
+    frame = 0;
   }
 
   function start() {
-    if (frame) window.cancelAnimationFrame(frame);
-    frame = 0;
+    halt();
     build();
-    if (reduceQuery.matches) draw(0);
-    else frame = window.requestAnimationFrame(draw);
+    running = true;
+    if (reduceQuery.matches) {
+      paint(0);
+      running = false;
+      return;
+    }
+    frame = window.requestAnimationFrame(draw);
   }
 
   if (reduceQuery.addEventListener) reduceQuery.addEventListener("change", start);
   window.addEventListener("resize", start);
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden) halt();
+    else start();
+  });
   start();
 })();

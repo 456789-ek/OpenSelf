@@ -214,8 +214,140 @@
   var turnPages = {
     "index.html": true,
     "notes.html": true,
-    "projects.html": true
+    "projects.html": true,
+    "awards.html": true
   };
+  var zooming = false;
+
+  function currentSection() {
+    if (document.body.classList.contains("page-notes")) return "notes";
+    if (document.body.classList.contains("page-projects")) return "projects";
+    if (document.body.classList.contains("page-awards")) return "awards";
+    return "";
+  }
+
+  function sectionCard(target) {
+    if (!target) return null;
+    return document.querySelector('.magic-bento-card[data-section="' + target + '"]');
+  }
+
+  function frameHero(card) {
+    var heroRect = hero.getBoundingClientRect();
+    var rect = card.getBoundingClientRect();
+    var cx = rect.left - heroRect.left + rect.width / 2;
+    var cy = rect.top - heroRect.top + rect.height / 2;
+    var scale = Math.max(window.innerWidth / rect.width, window.innerHeight / rect.height) * 1.08;
+    var tx = window.innerWidth / 2 - heroRect.left - scale * cx;
+    var ty = window.innerHeight / 2 - heroRect.top - scale * cy;
+    return "translate(" + tx.toFixed(2) + "px," + ty.toFixed(2) + "px) scale(" + scale.toFixed(4) + ")";
+  }
+
+  function finishReturn() {
+    if (!hero) return;
+    hero.style.transition = "";
+    hero.style.transform = "";
+    hero.style.transformOrigin = "";
+    root.classList.remove("camera-return");
+  }
+
+  function playPullback() {
+    if (!hero) return;
+    var veil = hero.querySelector(".zoom-veil");
+    window.requestAnimationFrame(function () {
+      window.requestAnimationFrame(function () {
+        hero.style.transition = "transform 0.98s cubic-bezier(0.16, 1, 0.3, 1)";
+        hero.style.transform = "none";
+        if (veil) veil.style.opacity = "";
+        function done(event) {
+          if (event.target !== hero || event.propertyName !== "transform") return;
+          hero.removeEventListener("transitionend", done);
+          finishReturn();
+        }
+        hero.addEventListener("transitionend", done);
+        window.setTimeout(function () {
+          if (root.classList.contains("camera-return")) finishReturn();
+        }, 1200);
+      });
+    });
+  }
+
+  function startCameraReturn() {
+    if (!hero || !root.classList.contains("camera-return")) return;
+    if (reduced()) {
+      root.classList.remove("camera-return");
+      return;
+    }
+    var card = sectionCard(root.getAttribute("data-camera-target") || "");
+    if (!card) {
+      hero.classList.add("is-framed");
+      root.classList.remove("camera-return");
+      return;
+    }
+    var veil = hero.querySelector(".zoom-veil");
+    hero.style.transformOrigin = "0 0";
+    hero.style.transition = "none";
+    hero.style.transform = frameHero(card);
+    hero.classList.add("is-framed");
+    if (veil) veil.style.opacity = "1";
+    void hero.offsetWidth;
+    playPullback();
+  }
+
+  function rememberCamera(payload) {
+    try {
+      sessionStorage.setItem("openself-camera", JSON.stringify(payload));
+      sessionStorage.setItem("openself-skip-vt", "1");
+    } catch (err) {}
+  }
+
+  function zoomInto(card, href, section) {
+    if (zooming || !hero) {
+      window.location.href = href;
+      return;
+    }
+    zooming = true;
+    root.classList.add("is-zooming");
+    hero.style.transformOrigin = "0 0";
+    hero.style.transition = "none";
+    hero.style.transform = "none";
+    void hero.offsetWidth;
+    hero.style.transition = "transform 0.92s cubic-bezier(0.65, 0, 0.35, 1)";
+    hero.style.transform = frameHero(card);
+    var gone = false;
+    function go() {
+      if (gone) return;
+      gone = true;
+      rememberCamera({ mode: "arrive", target: section });
+      window.location.href = href;
+    }
+    function onEnd(event) {
+      if (event.target !== hero || event.propertyName !== "transform") return;
+      hero.removeEventListener("transitionend", onEnd);
+      go();
+    }
+    hero.addEventListener("transitionend", onEnd);
+    window.setTimeout(go, 1200);
+  }
+
+  function zoomBack(href) {
+    if (zooming) return;
+    zooming = true;
+    rememberCamera({ mode: "return", target: currentSection() });
+    window.location.href = href;
+  }
+
+  startCameraReturn();
+
+  window.addEventListener("pageswap", function (event) {
+    var skip = false;
+    try {
+      skip = sessionStorage.getItem("openself-skip-vt") === "1";
+      if (skip) sessionStorage.removeItem("openself-skip-vt");
+    } catch (err) {}
+    if (skip && event.viewTransition && typeof event.viewTransition.skipTransition === "function") {
+      event.viewTransition.skipTransition();
+    }
+  });
 
   function pageFile(pathname) {
     var parts = (pathname || "").split("/");
@@ -263,23 +395,52 @@
 
   window.addEventListener("pageshow", function (event) {
     if (!event.persisted) return;
-    if (reduced() || crossDocTurn) {
-      root.classList.remove("is-leaving");
+    root.classList.remove("is-leaving");
+    if (hero && hero.style.transform && hero.style.transform !== "none" && !reduced()) {
+      root.classList.remove("is-zooming");
+      var veil = hero.querySelector(".zoom-veil");
+      if (veil) veil.style.opacity = "1";
+      hero.style.transformOrigin = "0 0";
+      window.requestAnimationFrame(function () {
+        hero.style.transition = "transform 0.98s cubic-bezier(0.16, 1, 0.3, 1)";
+        hero.style.transform = "none";
+        if (veil) veil.style.opacity = "";
+      });
       return;
     }
+    root.classList.remove("is-zooming");
+    if (reduced() || crossDocTurn) return;
     root.classList.remove("is-arriving");
     void root.offsetWidth;
     root.classList.add("is-arriving");
-    root.classList.remove("is-leaving");
   });
 
   document.addEventListener("click", function (event) {
     if (event.defaultPrevented || event.button !== 0) return;
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-    if (reduced() || crossDocTurn) return;
     var link = event.target;
     while (link && link !== document && link.tagName !== "A") link = link.parentNode;
     if (!crossPageLink(link)) return;
+    if (reduced()) return;
+
+    var dest = pageFile(new URL(link.href, location.href).pathname);
+    var card = link.closest ? link.closest(".magic-bento-card") : null;
+    var onHome = document.body.classList.contains("page-home");
+
+    if (onHome && card && hero) {
+      event.preventDefault();
+      zoomInto(card, link.href, card.getAttribute("data-section") || "");
+      return;
+    }
+
+    if (dest === "index.html" && !onHome) {
+      event.preventDefault();
+      zoomBack(link.href);
+      return;
+    }
+
+    if (crossDocTurn) return;
+
     event.preventDefault();
     var href = link.href;
     var gone = false;
