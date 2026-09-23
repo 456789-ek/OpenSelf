@@ -38,22 +38,43 @@
 }
 
 .word {
+  width: min(96vw, 1080px);
+  height: clamp(220px, 34vw, 320px);
   margin: 0;
   font-family: var(--display);
   font-weight: 700;
   font-size: clamp(3.15rem, 13vw, 8.6rem);
   line-height: 0.9;
   letter-spacing: -0.055em;
-  white-space: nowrap;
   color: var(--cream);
 }
 
-.word-letters {
-  display: inline-block;
+.word-fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  white-space: nowrap;
 }
 
-.word-letter {
-  display: inline-block;
+.word.is-ready .word-fallback {
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.word-particles {
+  position: absolute;
+  inset: 0;
+}
+
+.word .particle-text {
+  min-height: 0;
 }
 
 .choices {
@@ -369,58 +390,11 @@
   transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
 }
 
-html.is-arriving .word-letter,
-html.vt-arrive .word-letter,
-html:active-view-transition .word-letter {
-  animation: none;
-  opacity: 1;
-  filter: none;
-  transform: none;
-}
-
 html.is-arriving .reveal,
 html.vt-arrive .reveal,
 html:active-view-transition .reveal {
   opacity: 1;
   transform: none;
-}
-
-@keyframes letter-resolve {
-  0% {
-    opacity: 0;
-    filter: blur(16px);
-    transform: translateY(0.28em);
-  }
-  55% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 1;
-    filter: blur(0);
-    transform: none;
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .word-letter {
-    animation: letter-resolve 1.05s var(--ease) both;
-    animation-delay: calc(0.06s + var(--i) * 0.07s);
-  }
-
-  html.is-arriving .word-letter,
-  html.vt-arrive .word-letter,
-  html:active-view-transition .word-letter {
-    animation: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .word-letter {
-    animation: none;
-    opacity: 1;
-    filter: none;
-    transform: none;
-  }
 }
 
 @media (max-width: 720px) {

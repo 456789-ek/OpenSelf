@@ -9,6 +9,7 @@
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="css/system.css" />
   <link rel="stylesheet" href="css/home.css" />
+  <link rel="stylesheet" href="js/openself-particle.css" />
   <script>
     (function () {
       var root = document.documentElement;
@@ -33,8 +34,9 @@
 
   <main id="main" class="hero">
     <div class="hero-glow" aria-hidden="true"></div>
-    <h1 id="hero-title" class="word" aria-label="openself">
-      <span class="word-letters" aria-hidden="true"><span class="word-letter" style="--i: 0">o</span><span class="word-letter" style="--i: 1">p</span><span class="word-letter" style="--i: 2">e</span><span class="word-letter" style="--i: 3">n</span><span class="word-letter" style="--i: 4">s</span><span class="word-letter" style="--i: 5">e</span><span class="word-letter" style="--i: 6">l</span><span class="word-letter" style="--i: 7">f</span></span>
+    <h1 id="hero-title" class="word">
+      <span class="word-fallback">openself</span>
+      <div id="openself-title" class="word-particles"></div>
     </h1>
     <nav class="choices" aria-label="进入">
       <a href="notes.html">笔记</a>
@@ -42,6 +44,7 @@
     </nav>
   </main>
 
+  <script src="js/openself-particle.js"></script>
   <script src="js/home.js"></script>
 </body>
 </html>
