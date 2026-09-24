@@ -14,7 +14,7 @@
     clickEffect: true,
     spotlightRadius: 400,
     particleCount: 12,
-    glowColor: "132, 0, 255"
+    glowColor: "146, 126, 255"
   };
 
   var reduceQuery = window.matchMedia("(prefers-reduced-motion: reduce)");

@@ -2,8 +2,9 @@
    Heavy paint work (nebula clouds, starfields) is baked once into
    offscreen canvases; every frame only composites those layers with
    slow drift and pointer parallax, then adds the live elements:
-   twinkling halo stars, aurora ribbons, shooting stars and a pointer
-   trail. prefers-reduced-motion collapses everything to one still paint. */
+   twinkling halo stars and rare shooting stars. One palette: deep
+   indigo night, blue-violet river, a single warm gold core.
+   prefers-reduced-motion collapses everything to one still paint. */
 (function () {
   "use strict";
 
@@ -41,14 +42,11 @@
   var tiles = [];
   var lanes = [];
   var sparks = [];
-  var ribbons = [];
   var meteors = [];
   var nextMeteor = 0;
-  var trail = [];
 
   var haloWarm = null;
   var haloCool = null;
-  var glowSoft = null;
 
   var frame = 0;
   var running = false;
@@ -225,10 +223,10 @@
       );
     }
     var i;
-    for (i = 0; i < 10; i += 1) {
-      var p2 = bandPoint((i / 10 - 0.5) * reach * 1.8 + rng() * bandSigma, (rng() - 0.5) * bandSigma * 3.2);
+    for (i = 0; i < 8; i += 1) {
+      var p2 = bandPoint((i / 8 - 0.5) * reach * 1.8 + rng() * bandSigma, (rng() - 0.5) * bandSigma * 3.2);
       var n2 = toNeb(c, p2.x, p2.y);
-      cloud(g2, rng, n2.x, n2.y, bandSigma * (0.8 + rng() * 0.8) * n2.s, "72, 54, 156", 0.03 + rng() * 0.022, 4);
+      cloud(g2, rng, n2.x, n2.y, bandSigma * (0.8 + rng() * 0.8) * n2.s, "72, 54, 156", 0.022 + rng() * 0.016, 4);
     }
     return c;
   }
@@ -245,42 +243,37 @@
     for (along = -reach * 0.95; along <= reach * 0.95; along += bandSigma * 0.5) {
       var pr = bandPoint(along + (rng() - 0.5) * bandSigma * 0.2, (rng() - 0.5) * bandSigma * 0.25);
       var nr = toNeb(c, pr.x, pr.y);
-      puff(g2, nr.x, nr.y, bandSigma * (0.75 + rng() * 0.35) * nr.s, 0.45, angle, "104, 100, 200", 0.045);
+      puff(g2, nr.x, nr.y, bandSigma * (0.75 + rng() * 0.35) * nr.s, 0.45, angle, "104, 100, 200", 0.055);
     }
 
-    /* Warm heart of the galaxy. */
+    /* Warm heart of the galaxy: gold wrapped in rose-mauve so it
+       blends into the violet field instead of going brown. */
     var heart = bandPoint(coreAlong, 0);
     var hn = toNeb(c, heart.x, heart.y);
-    cloud(g2, rng, hn.x, hn.y, bandSigma * 1.5 * hn.s, "150, 100, 92", 0.09, 6);
-    cloud(g2, rng, hn.x, hn.y, bandSigma * 0.8 * hn.s, "226, 154, 98", 0.14, 5);
-    cloud(g2, rng, hn.x, hn.y, bandSigma * 0.42 * hn.s, "255, 204, 140", 0.22, 3);
-    puff(g2, hn.x, hn.y, bandSigma * 0.2 * hn.s, 0.75, angle, "255, 234, 194", 0.38);
+    cloud(g2, rng, hn.x, hn.y, bandSigma * 1.4 * hn.s, "146, 96, 148", 0.08, 6);
+    cloud(g2, rng, hn.x, hn.y, bandSigma * 0.78 * hn.s, "228, 158, 112", 0.13, 5);
+    cloud(g2, rng, hn.x, hn.y, bandSigma * 0.42 * hn.s, "255, 206, 146", 0.2, 3);
+    puff(g2, hn.x, hn.y, bandSigma * 0.19 * hn.s, 0.75, angle, "255, 236, 200", 0.34);
+    puff(g2, hn.x, hn.y, bandSigma * 0.085 * hn.s, 0.88, angle, "255, 246, 226", 0.55);
 
-    /* Violet and magenta shoulders along the whole band. */
+    /* Blue-violet shoulders along the whole band, one hue family. */
     var i;
     for (i = 0; i < 12; i += 1) {
       var shoulder = (i / 11 - 0.5) * reach * 1.8 + (rng() - 0.5) * bandSigma;
       var across = gaussian(rng) * bandSigma * 0.45;
       var p = bandPoint(shoulder, across);
       var n = toNeb(c, p.x, p.y);
-      var magenta = rng() < 0.35;
+      var plum = rng() < 0.35;
       cloud(
         g2,
         rng,
         n.x,
         n.y,
         bandSigma * (0.6 + rng() * 0.8) * n.s,
-        magenta ? "152, 70, 176" : "106, 68, 200",
-        0.05 + rng() * 0.035,
+        plum ? "122, 74, 190" : "98, 72, 198",
+        0.05 + rng() * 0.03,
         5
       );
-    }
-
-    /* A few cold teal wisps for range. */
-    for (i = 0; i < 3; i += 1) {
-      var p3 = bandPoint((rng() - 0.2) * reach, (0.9 + rng() * 1.4) * bandSigma * (rng() < 0.5 ? -1 : 1));
-      var n3 = toNeb(c, p3.x, p3.y);
-      cloud(g2, rng, n3.x, n3.y, bandSigma * (0.5 + rng() * 0.5) * n3.s, "58, 140, 160", 0.035, 4);
     }
     return c;
   }
@@ -289,9 +282,9 @@
     lanes = [];
     var reach = Math.hypot(width, height);
     var specs = [
-      { da: -0.55, dc: 0.1, len: 1, thick: 0.2, alpha: 0.4 },
-      { da: 0.05, dc: -0.14, len: 1.3, thick: 0.16, alpha: 0.34 },
-      { da: 0.6, dc: 0.16, len: 0.85, thick: 0.15, alpha: 0.28 }
+      { da: -0.55, dc: 0.12, len: 1, thick: 0.18, alpha: 0.26 },
+      { da: 0.05, dc: -0.18, len: 1.3, thick: 0.15, alpha: 0.2 },
+      { da: 0.6, dc: 0.18, len: 0.85, thick: 0.14, alpha: 0.17 }
     ];
     var i;
     for (i = 0; i < specs.length; i += 1) {
@@ -355,28 +348,6 @@
     return c;
   }
 
-  function bakeRibbon(color) {
-    var c = document.createElement("canvas");
-    c.width = Math.max(2, width);
-    c.height = 110;
-    var g2 = c.getContext("2d");
-    var vertical = g2.createLinearGradient(0, 0, 0, c.height);
-    vertical.addColorStop(0, "rgba(" + color + ", 0)");
-    vertical.addColorStop(0.45, "rgba(" + color + ", 1)");
-    vertical.addColorStop(1, "rgba(" + color + ", 0)");
-    g2.fillStyle = vertical;
-    g2.fillRect(0, 0, c.width, c.height);
-    var ends = g2.createLinearGradient(0, 0, c.width, 0);
-    ends.addColorStop(0, "rgba(0, 0, 0, 0)");
-    ends.addColorStop(0.18, "rgba(0, 0, 0, 1)");
-    ends.addColorStop(0.82, "rgba(0, 0, 0, 1)");
-    ends.addColorStop(1, "rgba(0, 0, 0, 0)");
-    g2.globalCompositeOperation = "destination-in";
-    g2.fillStyle = ends;
-    g2.fillRect(0, 0, c.width, c.height);
-    return c;
-  }
-
   function bakeSparks(rng) {
     sparks = [];
     var count = clamp(Math.round((width * height) / 82000), 14, 26);
@@ -394,8 +365,8 @@
         r: giant ? 1.5 + rng() * 0.8 : 0.9 + rng() * 0.7,
         halo: giant ? 46 + rng() * 40 : 14 + rng() * 20,
         warm: warm,
-        tw: 0.35 + rng() * 0.9,
-        pulse: 0.12 + rng() * 0.35,
+        tw: 0.22 + rng() * 0.55,
+        pulse: 0.1 + rng() * 0.25,
         phase: rng() * Math.PI * 2
       });
     }
@@ -417,14 +388,13 @@
     cosA = Math.cos(angle);
     sinA = Math.sin(angle);
     bandCX = width * 0.5;
-    bandCY = height * (width >= height ? 0.36 : 0.3);
-    coreAlong = -Math.hypot(width, height) * 0.26;
+    bandCY = height * (width >= height ? 0.34 : 0.28);
+    coreAlong = -Math.hypot(width, height) * 0.2;
     bandSigma = Math.max(120, Math.min(width, height) * (width >= height ? 0.3 : 0.42));
     maxShift = Math.min(56, Math.min(width, height) * 0.06);
 
     haloWarm = makeSprite(128, "rgba(255, 228, 188, 0.85)", "rgba(255, 180, 112, 0.16)", 0.22);
     haloCool = makeSprite(128, "rgba(228, 238, 255, 0.85)", "rgba(152, 172, 236, 0.15)", 0.22);
-    glowSoft = makeSprite(128, "rgba(174, 152, 255, 0.4)", "rgba(120, 92, 220, 0.1)", 0.35);
 
     var rng = mulberry32(0x51ee7a);
     base = bakeBase();
@@ -439,14 +409,8 @@
       { canvas: bakeTile(rng, clamp(Math.round(area / 2700), 260, 660), { rMin: 0.55, rMax: 1.45, aMin: 0.16, aMax: 0.5, bandBias: 0.25 }), speed: 16, depth: 0.38 }
     ];
 
-    ribbons = [
-      { sprite: bakeRibbon("96, 214, 188"), y: height * 0.08, amp: 11, wave: 0.16, phase: 0.4, alpha: 0.08 },
-      { sprite: bakeRibbon("150, 116, 235"), y: height * 0.17, amp: 15, wave: 0.11, phase: 2.1, alpha: 0.1 }
-    ];
-
     bakeSparks(rng);
     meteors = [];
-    trail = [];
     nextMeteor = 0;
   }
 
@@ -495,42 +459,11 @@
     }
   }
 
-  function drawRibbons(t, still) {
-    ctx.globalCompositeOperation = "lighter";
-    var slices = 26;
-    var sw = width / slices;
-    var i;
-    var r;
-    for (r = 0; r < ribbons.length; r += 1) {
-      var ribbon = ribbons[r];
-      for (i = 0; i < slices; i += 1) {
-        var dy = still
-          ? Math.sin(i * 0.5 + ribbon.phase) * ribbon.amp
-          : Math.sin(i * 0.5 + t * ribbon.wave * 4 + ribbon.phase) * ribbon.amp +
-            Math.sin(i * 0.21 - t * ribbon.wave * 2.6) * ribbon.amp * 0.5;
-        var flicker = still ? 0.8 : 0.72 + 0.28 * Math.sin(i * 0.8 + t * 1.1 + ribbon.phase);
-        ctx.globalAlpha = ribbon.alpha * flicker;
-        ctx.drawImage(
-          ribbon.sprite,
-          i * sw,
-          0,
-          sw,
-          ribbon.sprite.height,
-          i * sw,
-          ribbon.y + dy,
-          sw,
-          ribbon.sprite.height
-        );
-      }
-    }
-    ctx.globalAlpha = 1;
-  }
-
   function drawClearing() {
     ctx.globalCompositeOperation = "source-over";
     ctx.save();
-    ctx.translate(width * 0.5, height * 0.5);
-    ctx.scale(width * 0.46, height * 0.5);
+    ctx.translate(width * 0.5, height * 0.54);
+    ctx.scale(width * 0.44, height * 0.46);
     var g = ctx.createRadialGradient(0, 0, 0.1, 0, 0, 1);
     g.addColorStop(0, "rgba(5, 6, 18, 0.62)");
     g.addColorStop(0.45, "rgba(5, 6, 18, 0.4)");
@@ -559,13 +492,13 @@
         if (d < 230 && d > 0.001) {
           var f = 1 - d / 230;
           boost = f;
-          x += (dx / d) * f * 9;
-          y += (dy / d) * f * 9;
+          x += (dx / d) * f * 6;
+          y += (dy / d) * f * 6;
         }
       }
-      var pulse = still ? 1 : 0.86 + 0.14 * Math.sin(t * s.pulse * Math.PI * 2 + s.phase * 1.7);
-      var hr = s.halo * pulse * (1 + boost * 0.6);
-      ctx.globalAlpha = clamp((0.4 + 0.6 * tw) * (0.55 + boost * 0.7), 0, 1);
+      var pulse = still ? 1 : 0.88 + 0.12 * Math.sin(t * s.pulse * Math.PI * 2 + s.phase * 1.7);
+      var hr = s.halo * pulse * (1 + boost * 0.4);
+      ctx.globalAlpha = clamp((0.4 + 0.6 * tw) * (0.52 + boost * 0.45), 0, 1);
       ctx.drawImage(s.warm ? haloWarm : haloCool, x - hr, y - hr, hr * 2, hr * 2);
     }
     ctx.globalCompositeOperation = "source-over";
@@ -599,7 +532,7 @@
   function drawMeteors(t) {
     if (t >= nextMeteor && meteors.length < 2 && !document.hidden) {
       if (nextMeteor > 0) spawnMeteor(t);
-      nextMeteor = t + 4.5 + Math.random() * 6.5;
+      nextMeteor = t + 7 + Math.random() * 9;
     }
     if (!meteors.length) return;
     ctx.globalCompositeOperation = "lighter";
@@ -636,24 +569,6 @@
     meteors = alive;
   }
 
-  function drawTrail(now) {
-    if (!trail.length) return;
-    ctx.globalCompositeOperation = "lighter";
-    var alive = [];
-    var i;
-    for (i = 0; i < trail.length; i += 1) {
-      var dot = trail[i];
-      var age = (now - dot.at) / 750;
-      if (age >= 1) continue;
-      alive.push(dot);
-      var r = 20 + age * 30;
-      ctx.globalAlpha = 0.12 * (1 - age);
-      ctx.drawImage(glowSoft, dot.x - r, dot.y - r, r * 2, r * 2);
-    }
-    trail = alive;
-    ctx.globalAlpha = 1;
-  }
-
   function paint(now, still) {
     var t = still ? 0 : now / 1000;
     ctx.globalCompositeOperation = "source-over";
@@ -664,14 +579,10 @@
     drawNebula(nebulaNear, t, FLOW_NEAR, 0.15, 0.86, 0.14, 0.037, 2.2, 14, 0.033);
     drawTile(tiles[1], t);
     drawLanes(t);
-    drawRibbons(t, still);
     drawTile(tiles[2], t);
     drawClearing();
     drawSparks(t, still);
-    if (!still) {
-      drawMeteors(t);
-      drawTrail(now);
-    }
+    if (!still) drawMeteors(t);
     ctx.globalCompositeOperation = "source-over";
     ctx.globalAlpha = 1;
   }
@@ -719,12 +630,6 @@
     pointerOn = true;
     aimX = clamp(((pointerX / rect.width) - 0.5) * 2, -1.25, 1.25);
     aimY = clamp(((pointerY / rect.height) - 0.5) * 2, -1.25, 1.25);
-    var last = trail[trail.length - 1];
-    var stamp = performance.now();
-    if (!last || Math.hypot(pointerX - last.x, pointerY - last.y) > 14 || stamp - last.at > 90) {
-      trail.push({ x: pointerX, y: pointerY, at: stamp });
-      if (trail.length > 36) trail.shift();
-    }
   }
 
   window.addEventListener("pointermove", onPointer, { passive: true });
