@@ -23,10 +23,7 @@ html:has(body.page-home) {
   overflow: hidden;
   text-align: center;
   color: #f4f7ff;
-  background:
-    radial-gradient(120% 42% at 48% 44%, rgba(214, 226, 255, 0.14), transparent 58%),
-    radial-gradient(70% 28% at 66% 60%, rgba(150, 182, 230, 0.08), transparent 72%),
-    linear-gradient(180deg, #07091a 0%, #0c1428 46%, #161e36 100%);
+  background: #07091a;
 }
 
 .night-sky {
@@ -37,6 +34,7 @@ html:has(body.page-home) {
   height: 100%;
   pointer-events: none;
   display: block;
+  background: #07091a;
 }
 
 .word,
