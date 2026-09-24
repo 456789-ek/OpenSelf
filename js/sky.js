@@ -26,9 +26,14 @@
   var angle = -0.16;
   var cosA = 1;
   var sinA = 0;
-  var coreX = 0;
-  var coreY = 0;
+  var bandCX = 0;
+  var bandCY = 0;
+  var coreAlong = 0;
   var bandSigma = 120;
+
+  /* River flow, in px/s. Slow, but clearly visible within seconds. */
+  var FLOW_FAR = 5;
+  var FLOW_NEAR = 9.5;
 
   var base = null;
   var nebulaFar = null;
@@ -78,13 +83,14 @@
     return clamp(g, -2.5, 2.5);
   }
 
-  /* Band coordinates: along/across the tilted galactic axis. */
+  /* Band coordinates: along/across the tilted galactic axis, whose
+     centerline crosses the middle of the viewport. */
   function bandPoint(along, across) {
-    var wave = Math.sin(along * 0.0016) * bandSigma * 0.4;
+    var wave = Math.sin(along * 0.0011) * bandSigma * 0.25;
     var a = across + wave;
     return {
-      x: coreX + along * cosA - a * sinA,
-      y: coreY + along * sinA + a * cosA
+      x: bandCX + along * cosA - a * sinA,
+      y: bandCY + along * sinA + a * cosA
     };
   }
 
@@ -109,22 +115,29 @@
     return c;
   }
 
-  /* One soft elliptical cloud puff on a bake context. */
+  /* One soft elliptical cloud puff on a bake context, repeated at
+     tile-width offsets so the layer wraps horizontally without a seam. */
   function puff(g2, x, y, r, squash, rot, color, alpha) {
     if (r < 2) return;
-    g2.save();
-    g2.translate(x, y);
-    g2.rotate(rot);
-    g2.scale(1, squash);
-    var g = g2.createRadialGradient(0, 0, 0, 0, 0, r);
-    g.addColorStop(0, "rgba(" + color + ", " + alpha.toFixed(4) + ")");
-    g.addColorStop(0.55, "rgba(" + color + ", " + (alpha * 0.42).toFixed(4) + ")");
-    g.addColorStop(1, "rgba(" + color + ", 0)");
-    g2.fillStyle = g;
-    g2.beginPath();
-    g2.arc(0, 0, r, 0, Math.PI * 2);
-    g2.fill();
-    g2.restore();
+    var tw = g2.canvas.width;
+    var wrap;
+    for (wrap = -1; wrap <= 1; wrap += 1) {
+      var wx = x + wrap * tw;
+      if (wx + r * 1.2 < 0 || wx - r * 1.2 > tw) continue;
+      g2.save();
+      g2.translate(wx, y);
+      g2.rotate(rot);
+      g2.scale(1, squash);
+      var g = g2.createRadialGradient(0, 0, 0, 0, 0, r);
+      g.addColorStop(0, "rgba(" + color + ", " + alpha.toFixed(4) + ")");
+      g.addColorStop(0.55, "rgba(" + color + ", " + (alpha * 0.42).toFixed(4) + ")");
+      g.addColorStop(1, "rgba(" + color + ", 0)");
+      g2.fillStyle = g;
+      g2.beginPath();
+      g2.arc(0, 0, r, 0, Math.PI * 2);
+      g2.fill();
+      g2.restore();
+    }
   }
 
   /* A cluster of puffs around a center: the "volumetric" cloud look. */
@@ -168,27 +181,25 @@
 
     var floor = g2.createLinearGradient(0, height * 0.72, 0, height);
     floor.addColorStop(0, "rgba(10, 8, 30, 0)");
-    floor.addColorStop(1, "rgba(16, 10, 40, 0.32)");
+    floor.addColorStop(1, "rgba(14, 9, 36, 0.22)");
     g2.fillStyle = floor;
     g2.fillRect(0, height * 0.7, width, height * 0.3);
     return c;
   }
 
-  /* Nebula layers are baked at half resolution with PAD overscan and
-     scaled up when composited, so gradients stay smooth and cheap. */
+  /* Nebula layers are baked at half resolution as horizontally wrapping
+     tiles (with PAD vertical overscan), so the whole river can flow
+     sideways forever without a seam. */
   function nebulaCanvas() {
     var c = document.createElement("canvas");
-    c.width = Math.max(2, Math.round((width + PAD * 2) / 2));
+    c.width = Math.max(2, Math.round(width / 2));
     c.height = Math.max(2, Math.round((height + PAD * 2) / 2));
     return c;
   }
 
   function toNeb(c, x, y) {
-    return {
-      x: (x + PAD) * (c.width / (width + PAD * 2)),
-      y: (y + PAD) * (c.height / (height + PAD * 2)),
-      s: c.width / (width + PAD * 2)
-    };
+    var wrapped = ((x % width) + width) % width;
+    return { x: wrapped * 0.5, y: (y + PAD) * 0.5, s: 0.5 };
   }
 
   function bakeNebulaFar(rng) {
@@ -197,8 +208,8 @@
     g2.globalCompositeOperation = "lighter";
     var reach = Math.hypot(width, height);
     var along;
-    for (along = -reach * 0.75; along <= reach * 0.85; along += bandSigma * (0.8 + rng() * 0.5)) {
-      var across = gaussian(rng) * bandSigma * 0.7;
+    for (along = -reach * 0.9; along <= reach * 0.9; along += bandSigma * (0.55 + rng() * 0.35)) {
+      var across = gaussian(rng) * bandSigma * 0.55;
       var p = bandPoint(along, across);
       var n = toNeb(c, p.x, p.y);
       var deep = rng() < 0.4;
@@ -207,17 +218,17 @@
         rng,
         n.x,
         n.y,
-        (bandSigma * (1.3 + rng() * 1.4)) * n.s,
-        deep ? "34, 44, 118" : "52, 46, 132",
-        0.05 + rng() * 0.04,
+        (bandSigma * (1.1 + rng() * 1.2)) * n.s,
+        deep ? "36, 46, 124" : "54, 48, 140",
+        0.05 + rng() * 0.035,
         5
       );
     }
     var i;
     for (i = 0; i < 10; i += 1) {
-      var p2 = bandPoint((rng() * 0.5 + i / 10 - 0.5) * reach * 1.7, (rng() - 0.5) * bandSigma * 4.5);
+      var p2 = bandPoint((i / 10 - 0.5) * reach * 1.8 + rng() * bandSigma, (rng() - 0.5) * bandSigma * 3.2);
       var n2 = toNeb(c, p2.x, p2.y);
-      cloud(g2, rng, n2.x, n2.y, bandSigma * (0.9 + rng()) * n2.s, "70, 52, 150", 0.04 + rng() * 0.03, 4);
+      cloud(g2, rng, n2.x, n2.y, bandSigma * (0.8 + rng() * 0.8) * n2.s, "72, 54, 156", 0.03 + rng() * 0.022, 4);
     }
     return c;
   }
@@ -228,19 +239,29 @@
     g2.globalCompositeOperation = "lighter";
     var reach = Math.hypot(width, height);
 
-    /* Warm heart of the galaxy. */
-    var heart = toNeb(c, coreX, coreY);
-    cloud(g2, rng, heart.x, heart.y, bandSigma * 1.5 * heart.s, "148, 96, 88", 0.1, 6);
-    cloud(g2, rng, heart.x, heart.y, bandSigma * 0.85 * heart.s, "224, 152, 96", 0.15, 5);
-    cloud(g2, rng, heart.x, heart.y, bandSigma * 0.42 * heart.s, "255, 202, 138", 0.24, 3);
-    puff(g2, heart.x, heart.y, bandSigma * 0.2 * heart.s, 0.8, angle, "255, 232, 190", 0.4);
+    /* Continuous glow ribbon: elongated puffs along the centerline make
+       the band read as one river instead of separate clouds. */
+    var along;
+    for (along = -reach * 0.95; along <= reach * 0.95; along += bandSigma * 0.5) {
+      var pr = bandPoint(along + (rng() - 0.5) * bandSigma * 0.2, (rng() - 0.5) * bandSigma * 0.25);
+      var nr = toNeb(c, pr.x, pr.y);
+      puff(g2, nr.x, nr.y, bandSigma * (0.75 + rng() * 0.35) * nr.s, 0.45, angle, "104, 100, 200", 0.045);
+    }
 
-    /* Violet and magenta shoulders along the band. */
+    /* Warm heart of the galaxy. */
+    var heart = bandPoint(coreAlong, 0);
+    var hn = toNeb(c, heart.x, heart.y);
+    cloud(g2, rng, hn.x, hn.y, bandSigma * 1.5 * hn.s, "150, 100, 92", 0.09, 6);
+    cloud(g2, rng, hn.x, hn.y, bandSigma * 0.8 * hn.s, "226, 154, 98", 0.14, 5);
+    cloud(g2, rng, hn.x, hn.y, bandSigma * 0.42 * hn.s, "255, 204, 140", 0.22, 3);
+    puff(g2, hn.x, hn.y, bandSigma * 0.2 * hn.s, 0.75, angle, "255, 234, 194", 0.38);
+
+    /* Violet and magenta shoulders along the whole band. */
     var i;
-    for (i = 0; i < 10; i += 1) {
-      var along = (i / 9 - 0.35) * reach * 1.25 + (rng() - 0.5) * bandSigma;
-      var across = gaussian(rng) * bandSigma * 0.55;
-      var p = bandPoint(along, across);
+    for (i = 0; i < 12; i += 1) {
+      var shoulder = (i / 11 - 0.5) * reach * 1.8 + (rng() - 0.5) * bandSigma;
+      var across = gaussian(rng) * bandSigma * 0.45;
+      var p = bandPoint(shoulder, across);
       var n = toNeb(c, p.x, p.y);
       var magenta = rng() < 0.35;
       cloud(
@@ -248,9 +269,9 @@
         rng,
         n.x,
         n.y,
-        bandSigma * (0.7 + rng() * 0.9) * n.s,
-        magenta ? "150, 68, 172" : "104, 66, 196",
-        0.055 + rng() * 0.05,
+        bandSigma * (0.6 + rng() * 0.8) * n.s,
+        magenta ? "152, 70, 176" : "106, 68, 200",
+        0.05 + rng() * 0.035,
         5
       );
     }
@@ -268,15 +289,15 @@
     lanes = [];
     var reach = Math.hypot(width, height);
     var specs = [
-      { da: -0.15, dc: 0.1, len: 1, thick: 0.2, alpha: 0.4 },
-      { da: 0.35, dc: -0.14, len: 1.3, thick: 0.16, alpha: 0.34 },
-      { da: 0.95, dc: 0.16, len: 0.85, thick: 0.15, alpha: 0.28 }
+      { da: -0.55, dc: 0.1, len: 1, thick: 0.2, alpha: 0.4 },
+      { da: 0.05, dc: -0.14, len: 1.3, thick: 0.16, alpha: 0.34 },
+      { da: 0.6, dc: 0.16, len: 0.85, thick: 0.15, alpha: 0.28 }
     ];
     var i;
     for (i = 0; i < specs.length; i += 1) {
       var s = specs[i];
       lanes.push({
-        along: s.da * reach * 0.4 + (rng() - 0.5) * bandSigma * 0.4,
+        along: s.da * reach * 0.8 + (rng() - 0.5) * bandSigma * 0.4,
         across: s.dc * bandSigma * 2,
         rx: reach * 0.22 * s.len,
         ry: Math.max(14, bandSigma * s.thick),
@@ -392,12 +413,13 @@
     canvas.height = Math.max(1, Math.floor(height * dpr));
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    angle = width >= height ? -0.14 : -0.24;
+    angle = width >= height ? -0.18 : -0.3;
     cosA = Math.cos(angle);
     sinA = Math.sin(angle);
-    coreX = width * (width >= height ? 0.24 : 0.28);
-    coreY = height * (width >= height ? 0.3 : 0.2);
-    bandSigma = Math.max(110, Math.min(width, height) * (width >= height ? 0.3 : 0.4));
+    bandCX = width * 0.5;
+    bandCY = height * (width >= height ? 0.36 : 0.3);
+    coreAlong = -Math.hypot(width, height) * 0.26;
+    bandSigma = Math.max(120, Math.min(width, height) * (width >= height ? 0.3 : 0.42));
     maxShift = Math.min(56, Math.min(width, height) * 0.06);
 
     haloWarm = makeSprite(128, "rgba(255, 228, 188, 0.85)", "rgba(255, 180, 112, 0.16)", 0.22);
@@ -412,9 +434,9 @@
 
     var area = width * height;
     tiles = [
-      { canvas: bakeTile(rng, clamp(Math.round(area / 700), 900, 2400), { rMin: 0.3, rMax: 0.7, aMin: 0.05, aMax: 0.22, bandBias: 0.3 }), speed: 1.1, depth: 0.05 },
-      { canvas: bakeTile(rng, clamp(Math.round(area / 1050), 700, 1700), { rMin: 0.4, rMax: 1, aMin: 0.08, aMax: 0.34, bandBias: 0.55 }), speed: 2.2, depth: 0.16 },
-      { canvas: bakeTile(rng, clamp(Math.round(area / 2700), 260, 660), { rMin: 0.55, rMax: 1.45, aMin: 0.16, aMax: 0.5, bandBias: 0.2 }), speed: 4.2, depth: 0.38 }
+      { canvas: bakeTile(rng, clamp(Math.round(area / 650), 1000, 2600), { rMin: 0.3, rMax: 0.7, aMin: 0.05, aMax: 0.22, bandBias: 0.42 }), speed: 3.5, depth: 0.05 },
+      { canvas: bakeTile(rng, clamp(Math.round(area / 950), 800, 1900), { rMin: 0.4, rMax: 1, aMin: 0.08, aMax: 0.36, bandBias: 0.68 }), speed: 8, depth: 0.16 },
+      { canvas: bakeTile(rng, clamp(Math.round(area / 2700), 260, 660), { rMin: 0.55, rMax: 1.45, aMin: 0.16, aMax: 0.5, bandBias: 0.25 }), speed: 16, depth: 0.38 }
     ];
 
     ribbons = [
@@ -428,12 +450,14 @@
     nextMeteor = 0;
   }
 
-  function drawNebula(img, t, sway, swayAmp, depth, alphaBase, alphaAmp, breathe, phase) {
+  function drawNebula(img, t, flow, depth, alphaBase, alphaAmp, breathe, phase, swayAmp, sway) {
     ctx.globalCompositeOperation = "screen";
     ctx.globalAlpha = alphaBase + alphaAmp * Math.sin(t * breathe + phase);
-    var dx = Math.sin(t * sway + phase) * swayAmp + parX * maxShift * depth;
-    var dy = Math.cos(t * sway * 0.7 + phase) * swayAmp * 0.6 + parY * maxShift * depth;
-    ctx.drawImage(img, -PAD + dx, -PAD + dy, width + PAD * 2, height + PAD * 2);
+    var ox = (((t * flow + parX * maxShift * depth) % width) + width) % width;
+    var dy = -PAD + Math.sin(t * sway + phase) * swayAmp + parY * maxShift * depth;
+    var dh = height + PAD * 2;
+    ctx.drawImage(img, -ox, dy, width, dh);
+    if (ox > 0.5) ctx.drawImage(img, width - ox, dy, width, dh);
     ctx.globalAlpha = 1;
   }
 
@@ -448,10 +472,13 @@
 
   function drawLanes(t) {
     ctx.globalCompositeOperation = "source-over";
+    var range = Math.hypot(width, height) * 1.8;
     var i;
     for (i = 0; i < lanes.length; i += 1) {
       var lane = lanes[i];
-      var p = bandPoint(lane.along + Math.sin(t * 0.02 + i) * 24, lane.across);
+      var a = lane.along - t * FLOW_NEAR;
+      a = (((a + range * 0.5) % range) + range) % range - range * 0.5;
+      var p = bandPoint(a, lane.across);
       ctx.save();
       ctx.translate(p.x + parX * maxShift * 0.12, p.y + parY * maxShift * 0.12);
       ctx.rotate(angle + lane.tilt);
@@ -502,11 +529,11 @@
   function drawClearing() {
     ctx.globalCompositeOperation = "source-over";
     ctx.save();
-    ctx.translate(width * 0.5, height * 0.55);
-    ctx.scale(width * 0.42, height * 0.42);
+    ctx.translate(width * 0.5, height * 0.5);
+    ctx.scale(width * 0.46, height * 0.5);
     var g = ctx.createRadialGradient(0, 0, 0.1, 0, 0, 1);
-    g.addColorStop(0, "rgba(5, 6, 18, 0.66)");
-    g.addColorStop(0.45, "rgba(5, 6, 18, 0.42)");
+    g.addColorStop(0, "rgba(5, 6, 18, 0.62)");
+    g.addColorStop(0.45, "rgba(5, 6, 18, 0.4)");
     g.addColorStop(0.75, "rgba(5, 6, 18, 0.14)");
     g.addColorStop(1, "rgba(5, 6, 18, 0)");
     ctx.fillStyle = g;
@@ -632,9 +659,9 @@
     ctx.globalCompositeOperation = "source-over";
     ctx.globalAlpha = 1;
     ctx.drawImage(base, 0, 0);
-    drawNebula(nebulaFar, t, 0.021, 16, 0.07, 0.92, 0.08, 0.05, 0.8);
+    drawNebula(nebulaFar, t, FLOW_FAR, 0.07, 0.92, 0.08, 0.05, 0.8, 10, 0.021);
     drawTile(tiles[0], t);
-    drawNebula(nebulaNear, t, 0.033, 24, 0.15, 0.84, 0.16, 0.037, 2.2);
+    drawNebula(nebulaNear, t, FLOW_NEAR, 0.15, 0.86, 0.14, 0.037, 2.2, 14, 0.033);
     drawTile(tiles[1], t);
     drawLanes(t);
     drawRibbons(t, still);
